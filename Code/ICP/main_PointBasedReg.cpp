@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     RegistrationSolver.getLSEstimate(transfMatrix, rmsError);
     // std::cout<< "Transf Matrix: \n" << transfMatrix << std::endl;
     std::cout<< "RMS error: " << rmsError << std::endl;
-
+    writeToFile(transfMatrix, "PBR_transfMatrix.txt");
 
     printMessage("Magic!");
     return 1;
