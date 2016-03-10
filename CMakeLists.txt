@@ -189,12 +189,17 @@ endforeach()
 # Setup further include folders
 ######################################################################
 include_directories(Code/HelloWorld)
+include_directories(Code/ICP)
 include_directories(Testing/catch)
 include_directories(Testing/HelloWorld)
+include_directories(Testing/ICP)
+
  
 ######################################################################
 # Decide what subdirectories we are building, and go and build them.
 ######################################################################
 add_subdirectory(Code)
 add_subdirectory(Testing)
+
+
 
