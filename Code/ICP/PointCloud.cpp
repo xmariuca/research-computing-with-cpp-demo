@@ -1,14 +1,11 @@
 #include "PointCloud.h"
 #include "utils.h"
+#include "defs.h"
+
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
-
-
-
-#define FILE_1Point1Line 0
-#define FILE_3Points1Line 1
 
 namespace ICP_MPHYG02
 {
@@ -25,33 +22,35 @@ namespace ICP_MPHYG02
         m_pointsNumber = m_pointSet.cols();
         printMessage("* Point cloud object created!");
     }
-    PointCloud::PointCloud(std::string filename, int flag)
+    PointCloud::PointCloud(std::string filename, bool flag)
     {
-        // #define FILE_1Point1Line 0
-        if(flag == FILE_1Point1Line)
+        std::ifstream inputStream;
+        inputStream.open(filename);
+        std::vector<std::string> listLines;
+        if (inputStream.is_open())
         {
-            std::ifstream inputStream;
-            inputStream.open(filename);
-            std::vector<std::string> listLines;
-            if (inputStream.is_open()) {
-                while (!inputStream.eof()) {
-                    std::string tempLine;
-                    getline(inputStream,tempLine);
-                    listLines.push_back(tempLine);
-                    // std::cout << tempLine << "\n";
-                }
-            }
-            else
+            while (!inputStream.eof())
             {
-                std::cout << "Couldn't read file." << "\n";
+                std::string tempLine;
+                getline(inputStream,tempLine);
+                listLines.push_back(tempLine);
+                // std::cout << tempLine << "\n";
             }
-            inputStream.close();
+        }
+        else
+        {
+            std::cout << "Couldn't read file." << "\n";
+        }
+        inputStream.close();
+
+        if(flag == POINT_BASED_FLAG)
+        {
             // save points in my member variables
             m_pointsNumber = listLines.size();
-            if (m_pointsNumber)
+            if (m_pointsNumber > 0)
             {
                 m_pointSet = Eigen::MatrixXd::Zero(3,m_pointsNumber);
-                for (int i = 0; i <= m_pointsNumber; i++)
+                for (int i = 0; i < m_pointsNumber; i++)
                 {
                     int idxCoord = 0;
                     std::stringstream stream(listLines[i]);
@@ -59,7 +58,7 @@ namespace ICP_MPHYG02
                     while(stream >> coord)
                     {
                         if(!stream)
-                            break;
+                        break;
                         m_pointSet(idxCoord,i) = coord;
                         // std::cout << "Found coord: " << m_pointSet(idxCoord,i) << "\n";
                         idxCoord ++;
@@ -72,7 +71,48 @@ namespace ICP_MPHYG02
                 std::cout << "Empty file." << "\n";
             }
         }
+        else if(flag == SURFACE_BASED_FLAG)
+        {
+            // save points in my member variables
+            int numLines = listLines.size();
+            m_pointsNumber = 3 * numLines;
+            // std::cout << "numPts = " << m_pointsNumber << std::endl;
+            if (numLines)
+            {
+                m_pointSet = Eigen::MatrixXd::Zero(3,m_pointsNumber);
+                int idxPS = 0;
+                int idxLine = 0;
+                while(idxPS < m_pointsNumber && idxLine < numLines)
+                {
+                    // std::cout << "idxLine = " << idxLine << "\n";
+                    int idxCoord = 0;
+                    std::stringstream stream(listLines[idxLine]);
+                    float coord;
+                    while(stream >> coord)
+                    {
+                        if(!stream)
+                        break;
+                        m_pointSet(idxCoord,idxPS) = coord;
+                        idxCoord++;
+                        if (idxCoord > 2)
+                        {
+                            idxCoord = 0;
+                            idxPS++;
+                        }
+                    }
+                    idxLine++;
+                }
+            }
+            else
+            {
+                std::cout << "Empty file." << "\n";
+            } //seasons in the sun, big fish
+        }
+        // std::cout << m_pointSet << "\n";
+
+        std::cout << "Finished reading " << m_pointsNumber << " points\n";
     }
+
     PointCloud::~PointCloud()
     {
     }
