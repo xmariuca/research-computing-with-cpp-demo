@@ -90,7 +90,8 @@ int main(int argc, char** argv)
 
             ICPRegistration PointRegistration(POINT_BASED_FLAG);
             double RMS = 0;
-            PointRegistration.solve(pPCD, qPCD, RMS, outputPath);
+            Eigen::Matrix4d finalTransf;
+            PointRegistration.solve(pPCD, qPCD, RMS, finalTransf, outputPath);
         }
         // else
         // {
@@ -105,5 +106,5 @@ int main(int argc, char** argv)
         return 2;//ERROR_UNHANDLED_EXCEPTION;
     }
 
-    return 0;
+    return SUCCESS;
 }

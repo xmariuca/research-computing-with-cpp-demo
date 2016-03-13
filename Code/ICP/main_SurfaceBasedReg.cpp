@@ -92,8 +92,9 @@ int main(int argc, char** argv)
 
             ICPRegistration SurfaceRegistration(SURFACE_BASED_FLAG);
             double RMS = 0;
+            Eigen::Matrix4d finalTransf;
             // std::string outputPath("SBF_Transf.txt");
-            SurfaceRegistration.solve(pPCD, qPCD, RMS, outputPath);
+            SurfaceRegistration.solve(pPCD, qPCD, RMS, finalTransf, outputPath);
         }
     }
     catch(std::exception& e)
@@ -103,5 +104,5 @@ int main(int argc, char** argv)
         return 2;//ERROR_UNHANDLED_EXCEPTION;
     }
     // printMessage("Magic!");
-    return 1;
+    return SUCCESS;
 }

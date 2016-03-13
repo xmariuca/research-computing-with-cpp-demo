@@ -1,5 +1,8 @@
 #include "utils.h"
 #include  <iomanip> // setprecision
+#include <sstream>
+#include <vector>
+#include <string>
 
 namespace ICP_MPHYG02
 {
@@ -30,5 +33,51 @@ namespace ICP_MPHYG02
             std::cout << "Couldn't open output file.\n";
         }
         outStream.close();
+    }
+    void readTransfFromFile(Eigen::Matrix4d& out_matrix, std::string filename)
+    {
+        out_matrix = Eigen::Matrix4d::Identity();
+        std::ifstream inputStream;
+        inputStream.open(filename);
+        std::vector<std::string> listLines;
+
+        if (inputStream.is_open())
+        {
+            while (!inputStream.eof())
+            {
+                std::string tempLine;
+                getline(inputStream,tempLine);
+                listLines.push_back(tempLine);
+                // std::cout << tempLine << "\n";
+            }
+        }
+        else
+        {
+            std::cout << "Couldn't read file." << "\n";
+        }
+        inputStream.close();
+
+        if (listLines.size() > 0)
+        {
+            for (int i = 0; i < listLines.size(); i++)
+            {
+                int idxCoord = 0;
+                std::stringstream stream(listLines[i]);
+                float coord;
+                while(stream >> coord)
+                {
+                    if(!stream)
+                    break;
+                    out_matrix(i,idxCoord) = coord;
+                    // std::cout << "Found coord: " << m_pointSet(idxCoord,i) << "\n";
+                    idxCoord ++;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Empty file." << "\n";
+        }
+
     }
 }//namespace ICP_MPHYG02

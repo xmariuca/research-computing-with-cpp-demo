@@ -111,13 +111,15 @@ namespace ICP_MPHYG02
         out_pFixedPCD.setPointSet(out_pFixed);
         // std::cout <<  " Corresp done!" << std::endl;
     }
-    void ICPRegistration::solve(PointCloud& pFixedPCD, PointCloud& qMovingPCD, double& out_err, std::string& outputPath)
+    void ICPRegistration::solve(PointCloud& pFixedPCD, PointCloud& qMovingPCD, double& out_err, Eigen::Matrix4d& out_transfMatrix, std::string& outputPath)
     {
         if(m_ICP_FLAG == POINT_BASED_FLAG)
         {
             Eigen::Matrix4d transfMatrix(Eigen::Matrix4d::Zero());
             printMessage("Estimating transformation...");
             ICPRegistration::getLSEstimate(pFixedPCD, qMovingPCD, transfMatrix, out_err);
+            out_transfMatrix = transfMatrix;
+
             std::cout<< "*** Transf Matrix: \n" << transfMatrix << std::endl;
             std::cout<< "*** RMS error: " << out_err << std::endl;
             printMessage("Writing transformation to file...");
@@ -159,7 +161,8 @@ namespace ICP_MPHYG02
 
                 prevErr = thisErr;
             }
-
+            out_transfMatrix = finalTransfMat;
+            out_err = thisErr;
             std::cout << "*** Final Transf = \n" << finalTransfMat << std::endl;
             std::cout << "*** ICP - num iterations = " << i+1 << std::endl;
             std::cout << "*** ICP - final error = " << thisErr << std::endl;
