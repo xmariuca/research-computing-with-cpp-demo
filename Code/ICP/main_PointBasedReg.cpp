@@ -3,6 +3,8 @@
 #include <fstream>
 #include <string>
 #include <Eigen/Dense>
+#include "ExceptionIcp.h"
+#include <exception>
 #include "boost/program_options.hpp"
 
 #include "PointCloud.h"
@@ -52,7 +54,7 @@ int main(int argc, char** argv)
         {
             std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
             std::cerr << description << std::endl;
-            return 1;//ERROR_IN_COMMAND_LINE;
+            return ERROR_CMD_LINE;
         }
         if(vm.count("version"))
         {
@@ -81,13 +83,29 @@ int main(int argc, char** argv)
         if( !(inputPathFixed.empty()) && !(inputPathMoving.empty()))
         {
             printMessage("***");
-            PointCloud pPCD(inputPathFixed, POINT_BASED_FLAG);
-            PointCloud qPCD(inputPathMoving, POINT_BASED_FLAG);
+            try
+            {
+                PointCloud pPCD(inputPathFixed, POINT_BASED_FLAG);
+                PointCloud qPCD(inputPathMoving, POINT_BASED_FLAG);
+                ICPRegistration PointRegistration(POINT_BASED_FLAG);
+                double RMS = 0;
+                Eigen::Matrix4d finalTransf;
+                PointRegistration.solve(pPCD, qPCD, RMS, finalTransf, outputPath);
+            }
+            catch(ExceptionIcp& err)
+            {
+                std::cout << "********************************\n";
+                std::cout << err.what();
+                std::cout << "********************************\n";
+            }
+            catch(std::exception& err)
+            {
+                std::cout << "********************************\n";
+                std::cout << err.what();
+                std::cout << "********************************\n";
+                return UNHANDLED_EXCEPTION;
+            }
 
-            ICPRegistration PointRegistration(POINT_BASED_FLAG);
-            double RMS = 0;
-            Eigen::Matrix4d finalTransf;
-            PointRegistration.solve(pPCD, qPCD, RMS, finalTransf, outputPath);
         }
         // else
         // {
@@ -97,9 +115,8 @@ int main(int argc, char** argv)
     }
     catch(std::exception& e)
     {
-        std::cerr << "Unhandled Exception reached the top of main: "
-        << e.what() << ", application will now exit" << std::endl;
-        return 2;//ERROR_UNHANDLED_EXCEPTION;
+        std::cout << "********************************\n" << e.what() << std::endl;
+        return UNHANDLED_EXCEPTION;
     }
 
     return SUCCESS;

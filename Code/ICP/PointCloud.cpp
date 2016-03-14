@@ -1,7 +1,7 @@
 #include "PointCloud.h"
 #include "utils.h"
 #include "defs.h"
-
+#include "ExceptionIcp.h"
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -9,19 +9,22 @@
 
 namespace ICP_MPHYG02
 {
-    // PointCloud::PointCloud()
-    // {
-    //     m_pointSet = Matrix3d::Zero();
-    //     m_pointsNumber = 0;
-    // }
     // ************************************************************************
     PointCloud::PointCloud(Eigen::MatrixXd& in_pSet)
     {
-        // check that it is in the format of 3 x numPts
+        if(in_pSet.rows() != 3)
+        {
+            throw ExceptionIcp("The input point set has to be in the format 3xn, where n = number of points", "PointCloud.cpp");
+        }
+        if(in_pSet.isZero())
+        {
+            throw ExceptionIcp("Constructor called with empty point set", "PointCloud.cpp");
+        }
         m_pointSet = in_pSet;
         m_pointsNumber = m_pointSet.cols();
         printMessage("* Point cloud object created!");
     }
+    // ************************************************************************
     PointCloud::PointCloud(std::string filename, bool flag)
     {
         std::ifstream inputStream;
@@ -33,13 +36,19 @@ namespace ICP_MPHYG02
             {
                 std::string tempLine;
                 getline(inputStream,tempLine);
-                listLines.push_back(tempLine);
-                // std::cout << tempLine << "\n";
+                if (tempLine.empty())
+                {
+                    std::cout << "Skipping empty line..." << std::endl;
+                }
+                else
+                {
+                    listLines.push_back(tempLine);
+                }
             }
         }
         else
         {
-            std::cout << "Couldn't read file." << "\n";
+            throw ExceptionIcp("Couldn't open input stream", "PointCloud.cpp");
         }
         inputStream.close();
 
@@ -47,81 +56,88 @@ namespace ICP_MPHYG02
         {
             // save points in my member variables
             m_pointsNumber = listLines.size();
-            if (m_pointsNumber > 0)
+            if(listLines.size() < 1)
             {
-                m_pointSet = Eigen::MatrixXd::Zero(3,m_pointsNumber);
-                for (int i = 0; i < m_pointsNumber; i++)
-                {
-                    int idxCoord = 0;
-                    std::stringstream stream(listLines[i]);
-                    float coord;
-                    while(stream >> coord)
-                    {
-                        if(!stream)
-                        break;
-                        m_pointSet(idxCoord,i) = coord;
-                        // std::cout << "Found coord: " << m_pointSet(idxCoord,i) << "\n";
-                        idxCoord ++;
-
-                    }
-                }
+                throw ExceptionIcp("The input file is empty!", "PointCloud.cpp");
             }
-            else
+            m_pointSet = Eigen::MatrixXd::Zero(3,m_pointsNumber);
+            for (int i = 0; i < m_pointsNumber; i++)
             {
-                std::cout << "Empty file." << "\n";
+                int idxCoord = 0;
+                std::stringstream stream(listLines[i]);
+                float coord;
+                while(stream >> coord)
+                {
+                    if(!stream) break;
+                    if(idxCoord > 2)
+                    {
+                        throw ExceptionIcp("The input file should contain 1 point per line (x y z)", "PointCloud.cpp");
+                    }
+                    m_pointSet(idxCoord,i) = coord;
+                    // std::cout << "Found coord " << idxCoord << ": " << coord << "\n";
+                    idxCoord ++;
+                }
+
             }
         }
         else if(flag == SURFACE_BASED_FLAG)
         {
             // save points in my member variables
             int numLines = listLines.size();
+            if(listLines.size() < 1)
+            {
+                throw ExceptionIcp("The input file is empty!", "PointCloud.cpp");
+            }
             m_pointsNumber = 3 * numLines;
             // std::cout << "numPts = " << m_pointsNumber << std::endl;
-            if (numLines)
+            m_pointSet = Eigen::MatrixXd::Zero(3,m_pointsNumber);
+            int idxPS = 0;
+            int idxLine = 0;
+            while(idxPS < m_pointsNumber && idxLine < numLines)
             {
-                m_pointSet = Eigen::MatrixXd::Zero(3,m_pointsNumber);
-                int idxPS = 0;
-                int idxLine = 0;
-                while(idxPS < m_pointsNumber && idxLine < numLines)
+                int counterPts = 0;
+                // std::cout << "idxLine = " << idxLine << "\n";
+                int idxCoord = 0;
+                std::stringstream stream(listLines[idxLine]);
+                float coord;
+                while(stream >> coord)
                 {
-                    // std::cout << "idxLine = " << idxLine << "\n";
-                    int idxCoord = 0;
-                    std::stringstream stream(listLines[idxLine]);
-                    float coord;
-                    while(stream >> coord)
+                    if(!stream)
+                    break;
+                    m_pointSet(idxCoord,idxPS) = coord;
+                    idxCoord++;
+                    if (idxCoord > 2)
                     {
-                        if(!stream)
-                        break;
-                        m_pointSet(idxCoord,idxPS) = coord;
-                        idxCoord++;
-                        if (idxCoord > 2)
-                        {
-                            idxCoord = 0;
-                            idxPS++;
-                        }
+                        idxCoord = 0;
+                        idxPS++;
                     }
-                    idxLine++;
+                    counterPts++;
                 }
+                if(counterPts != 9)
+                {
+                    throw ExceptionIcp("The input file should contain 3 point per line (x1 y1 z1 x2 y2 z2 x3 y3 z3)", "PointCloud.cpp");
+                }
+                idxLine++;
             }
-            else
-            {
-                std::cout << "Empty file." << "\n";
-            } //seasons in the sun, big fish
+
         }
         // std::cout << m_pointSet << "\n";
 
         std::cout << "Finished reading " << m_pointsNumber << " points\n";
-    }
 
+    }
+    // ************************************************************************
     PointCloud::~PointCloud()
     {
     }
+    // ************************************************************************
     PointCloud::PointCloud(const PointCloud& in_pSrc)
     {
         m_pointSet = in_pSrc.m_pointSet;
         m_pointsNumber = in_pSrc.m_pointsNumber;
 
     }
+    // ************************************************************************
     PointCloud& PointCloud::operator= (const PointCloud &in_pSrc)
     {
         // check for self - assignment
@@ -154,15 +170,13 @@ namespace ICP_MPHYG02
     // ************************************************************************
     void PointCloud::applyTransformation(Eigen::Matrix4d& transfMat)
     {
-        std::cout << m_pointSet << std::endl;
-
-        for ( int i = 0; i < m_pointsNumber; i++)
+        if(transfMat(3,3) != 1)
         {
-            Eigen::Vector4d thisCoord = m_pointSet.col(i).homogeneous();
-            Eigen::Vector4d newCoord = transfMat * thisCoord;
-            m_pointSet.col(i) = newCoord.block(0,0,3,1);
+            throw ExceptionIcp("The transformation matrix should be 4x4, [R,t] format", "PointCloud.cpp");
         }
-        std::cout << m_pointSet << std::endl;
+        Eigen::MatrixXd ps_homog = m_pointSet.colwise().homogeneous();
+        Eigen::MatrixXd ps_updated = (transfMat * ps_homog).block(0,0,3,m_pointsNumber);
+        m_pointSet = ps_updated;
     }
 
 }    //namespace ICP_MPHYG02

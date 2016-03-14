@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <Eigen/Dense>
+#include "ExceptionIcp.h"
+#include <exception>
 #include "boost/program_options.hpp"
 
 #include "PointCloud.h"
@@ -81,15 +83,30 @@ int main(int argc, char** argv)
         if( !(inputPathFixed.empty()) && !(inputPathMoving.empty()))
         {
             printMessage("***");
+            try
+            {
+                PointCloud pPCD(inputPathFixed, SURFACE_BASED_FLAG);
+                PointCloud qPCD(inputPathMoving, SURFACE_BASED_FLAG);
 
-            PointCloud pPCD(inputPathFixed, SURFACE_BASED_FLAG);
-            PointCloud qPCD(inputPathMoving, SURFACE_BASED_FLAG);
-
-            ICPRegistration SurfaceRegistration(SURFACE_BASED_FLAG);
-            double RMS = 0;
-            Eigen::Matrix4d finalTransf;
-            // std::string outputPath("SBF_Transf.txt");
-            SurfaceRegistration.solve(pPCD, qPCD, RMS, finalTransf, outputPath);
+                ICPRegistration SurfaceRegistration(SURFACE_BASED_FLAG);
+                double RMS = 0;
+                Eigen::Matrix4d finalTransf;
+                // std::string outputPath("SBF_Transf.txt");
+                SurfaceRegistration.solve(pPCD, qPCD, RMS, finalTransf, outputPath);
+            }
+            catch(ExceptionIcp& err)
+            // catch(std::exception& err)
+            {
+                std::cout << "********************************\n";
+                std::cout << err.what();
+                std::cout << "********************************\n";
+            }
+            catch(std::exception& err)
+            {
+                std::cout << "********************************\n";
+                std::cout << err.what();
+                std::cout << "********************************\n";
+            }
         }
     }
     catch(std::exception& e)

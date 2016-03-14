@@ -1,6 +1,8 @@
 #include "ICPRegistration.h"
 #include <iostream>
 #include <Eigen/Geometry>
+#include "ExceptionIcp.h"
+
 
 
 namespace ICP_MPHYG02
@@ -17,7 +19,10 @@ namespace ICP_MPHYG02
     {
         long numPointsP = pFixedPCD.getPointsNum();
         long numPointsQ = qMovingPCD.getPointsNum();
-
+        if(numPointsP != numPointsQ)
+        {
+            throw ExceptionIcp("The 2 point clouds have to have equal sizes", "ICPRegistration.cpp");
+        }
         Eigen::Vector3d pMeanVect(0,0,0);
         Eigen::Vector3d qMeanVect(0,0,0);
         Eigen::MatrixXd pCentered(Eigen::MatrixXd::Zero(3,numPointsP));
@@ -31,7 +36,7 @@ namespace ICP_MPHYG02
         qMovingPCD.getCenteredPCD(qCentered);
         // // compute the covariance matrix
         //// one version to compute the covariance matrix
-        // for( int i = 0; i < m_numPoints; i++)
+        // for( int i = 0; i < numPointsP; i++)
         // {
         //     covarianceMat += pCentered.col(i) * qCentered.col(i).transpose();
         // }
@@ -67,9 +72,12 @@ namespace ICP_MPHYG02
 
     void ICPRegistration::findCorrespondences(PointCloud& pFixedPCD, PointCloud& qMovingPCD,PointCloud& out_pFixedPCD, Eigen::MatrixXd& idxCorresp)
     {
-
         long numPointsP = pFixedPCD.getPointsNum();
         long numPointsQ = qMovingPCD.getPointsNum();
+        if(numPointsP != numPointsQ)
+        {
+            throw ExceptionIcp("The 2 point clouds have to have equal sizes", "ICPRegistration.cpp");
+        }
 
         idxCorresp = Eigen::MatrixXd::Zero(numPointsQ,2);
         Eigen::MatrixXd distanceMat = Eigen::MatrixXd::Zero(numPointsP,numPointsQ);
@@ -129,8 +137,8 @@ namespace ICP_MPHYG02
         else if(m_ICP_FLAG == SURFACE_BASED_FLAG)
         {
             Eigen::MatrixXd idxCorresp;
-            Eigen::MatrixXd old_q;
-            Eigen::MatrixXd updated_q;
+            // Eigen::MatrixXd old_q;
+            // Eigen::MatrixXd updated_q;
             long numPointsQ = qMovingPCD.getPointsNum();
             Eigen::Matrix4d transfMatrix(Eigen::Matrix4d::Zero());
             Eigen::Matrix4d finalTransfMat(Eigen::Matrix4d::Identity());
@@ -148,10 +156,11 @@ namespace ICP_MPHYG02
                 ICPRegistration::getLSEstimate(out_pPCD, qMovingPCD, transfMatrix, thisErr);
 
                 // update q according to the transformation matrix
-                qMovingPCD.getPointSet(old_q);
-                Eigen::MatrixXd old_q_homog = old_q.colwise().homogeneous();
-                updated_q = (transfMatrix * old_q_homog).block(0,0,3,numPointsQ);
-                qMovingPCD.setPointSet(updated_q);
+                // qMovingPCD.getPointSet(old_q);
+                // Eigen::MatrixXd old_q_homog = old_q.colwise().homogeneous();
+                // updated_q = (transfMatrix * old_q_homog).block(0,0,3,numPointsQ);
+                // qMovingPCD.setPointSet(updated_q);
+                qMovingPCD.applyTransformation(transfMatrix);
 
                 finalTransfMat = transfMatrix * finalTransfMat;
                 std::cout << "current RMS \t" << thisErr << std::endl;
