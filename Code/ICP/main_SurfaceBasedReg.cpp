@@ -9,11 +9,6 @@
 #include "utils.h"
 #include "defs.h"
 
-static const char* PATH_IN_FIXED = "../../../research-computing-with-cpp-demo/Testing/SurfaceBasedRegistrationData/fran_cut.txt";
-// static const char* PATH_IN_FIXED = "../../../research-computing-with-cpp-demo/Testing/SurfaceBasedRegistrationData/testRead.txt";
-static const char* PATH_IN_MOVING = "../../../research-computing-with-cpp-demo/Testing/SurfaceBasedRegistrationData/fran_cut_transformed.txt";
-
-
 using namespace ICP_MPHYG02;
 namespace po = boost::program_options;
 
@@ -21,7 +16,7 @@ namespace po = boost::program_options;
 void printExampleCall()
 {
     std::cout << "*** Example of a program call:\n";
-    std::cout << "./doSurfaceBasedReg --inputFile1 " << PATH_IN_FIXED << " --inputFile2 " << PATH_IN_MOVING << " --outputFile finalTransf.txt" << std::endl;
+    std::cout << "./doSurfaceBasedReg --inputFile1 " << PATH_IN_FIXED_SURF << " --inputFile2 " << PATH_IN_MOVING_SURF << " --outputFile finalTransf.txt" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -87,8 +82,8 @@ int main(int argc, char** argv)
         {
             printMessage("***");
 
-            PointCloud pPCD(PATH_IN_FIXED, SURFACE_BASED_FLAG);
-            PointCloud qPCD(PATH_IN_MOVING, SURFACE_BASED_FLAG);
+            PointCloud pPCD(inputPathFixed, SURFACE_BASED_FLAG);
+            PointCloud qPCD(inputPathMoving, SURFACE_BASED_FLAG);
 
             ICPRegistration SurfaceRegistration(SURFACE_BASED_FLAG);
             double RMS = 0;

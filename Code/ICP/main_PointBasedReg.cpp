@@ -10,17 +10,13 @@
 #include "utils.h"
 #include "defs.h"
 
-static const char* PATH_IN_FIXED = "../../../research-computing-with-cpp-demo/Testing/PointBasedRegistrationData/fixed.txt";
-static const char* PATH_IN_MOVING = "../../../research-computing-with-cpp-demo/Testing/PointBasedRegistrationData/moving.txt";
-
-
 using namespace ICP_MPHYG02;
 namespace po = boost::program_options;
 
 void printExampleCall()
 {
     std::cout << "*** Example of a program call:\n";
-    std::cout << "./doPointBasedReg --inputFile1 " << PATH_IN_FIXED << " --inputFile2 " << PATH_IN_MOVING << " --outputFile finalTransf.txt" << std::endl;
+    std::cout << "./doPointBasedReg --inputFile1 " << PATH_IN_FIXED_PTS << " --inputFile2 " << PATH_IN_MOVING_PTS << " --outputFile finalTransf.txt" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -69,17 +65,17 @@ int main(int argc, char** argv)
         if(vm.count("inputFile1"))
         {
             inputPathFixed = vm["inputFile1"].as<std::string>();
-            std::cout << "inputFile1 = " << inputPathFixed << std::endl;
+            std::cout << "***inputFile1 = " << inputPathFixed << std::endl;
         }
         if(vm.count("inputFile2"))
         {
             inputPathMoving = vm["inputFile2"].as<std::string>();
-            std::cout << "inputFile2 = " << inputPathMoving << std::endl;
+            std::cout << "***inputFile2 = " << inputPathMoving << std::endl;
         }
         if(vm.count("outputFile"))
         {
             outputPath = vm["outputFile"].as<std::string>();
-            std::cout << "outputFile = " << outputPath << std::endl;
+            std::cout << "***outputFile = " << outputPath << std::endl;
         }
 
         if( !(inputPathFixed.empty()) && !(inputPathMoving.empty()))
