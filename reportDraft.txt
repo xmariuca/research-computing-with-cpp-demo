@@ -1,2 +1,0 @@
-tutorial boost program_options
-http://www.radmangames.com/programming/how-to-use-boost-program_options

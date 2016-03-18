@@ -94,13 +94,13 @@ int main(int argc, char** argv)
                 // std::string outputPath("SBF_Transf.txt");
                 SurfaceRegistration.solve(pPCD, qPCD, RMS, finalTransf, outputPath);
             }
-            catch(ExceptionIcp& err)
-            // catch(std::exception& err)
-            {
-                std::cout << "********************************\n";
-                std::cout << err.what();
-                std::cout << "********************************\n";
-            }
+            // catch(ExceptionIcp& err)
+            // // catch(std::exception& err)
+            // {
+            //     std::cout << "********************************\n";
+            //     std::cout << err.what();
+            //     std::cout << "********************************\n";
+            // }
             catch(std::exception& err)
             {
                 std::cout << "********************************\n";

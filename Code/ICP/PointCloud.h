@@ -21,8 +21,6 @@ namespace ICP_MPHYG02
         long getPointsNum() { return m_pointsNumber;}
         void getPointSet(Eigen::MatrixXd& out_ps){out_ps = m_pointSet;}
         void setPointSet(Eigen::MatrixXd& in_ps){ m_pointSet = in_ps;}
-        // void updatePositions(Eigen::MatrixXd& idx)
-        // bool writePCD(std::string filename);
 
     private:
         Eigen::MatrixXd m_pointSet;

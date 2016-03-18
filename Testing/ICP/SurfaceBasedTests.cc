@@ -36,8 +36,21 @@ TEST_CASE("Test the findCorrespondences method" , "[surfacebased_findCorresp]")
     SECTION( "throws exception (findCorresp) - unequal point set sizes" ) {
         Eigen::MatrixXd qMatTemp(Eigen::MatrixXd::Random(3,9));
         PointCloud qPCDTemp(qMatTemp);
-        PointCloud out_p(pMat);
+        PointCloud pOutPCD(pMat);
         Eigen::MatrixXd idxCorresp;
-        REQUIRE_THROWS(SurfaceRegistration.findCorrespondences(pPCD, qPCDTemp,out_p, idxCorresp));
+        REQUIRE_THROWS(SurfaceRegistration.findCorrespondences(pPCD, qPCDTemp,pOutPCD, idxCorresp));
+    }
+
+    SECTION( "test the output with identical matrices" ) {
+        PointCloud pOutPCD(pMat);
+        PointCloud qMat(pMat);
+        Eigen::MatrixXd idxCorresp;
+        SurfaceRegistration.findCorrespondences(pPCD, qMat, pOutPCD, idxCorresp);
+
+        Eigen::MatrixXd outPsMat;
+        pOutPCD.getPointSet(outPsMat);
+
+        Eigen::VectorXd RMSVect = (outPsMat - pMat).colwise().norm();
+        REQUIRE(RMSVect.sum() < 0.0001);
     }
 }

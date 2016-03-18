@@ -92,12 +92,12 @@ int main(int argc, char** argv)
                 Eigen::Matrix4d finalTransf;
                 PointRegistration.solve(pPCD, qPCD, RMS, finalTransf, outputPath);
             }
-            catch(ExceptionIcp& err)
-            {
-                std::cout << "********************************\n";
-                std::cout << err.what();
-                std::cout << "********************************\n";
-            }
+            // catch(ExceptionIcp& err)
+            // {
+            //     std::cout << "********************************\n";
+            //     std::cout << err.what();
+            //     std::cout << "********************************\n";
+            // }
             catch(std::exception& err)
             {
                 std::cout << "********************************\n";

@@ -179,4 +179,4 @@ namespace ICP_MPHYG02
         m_pointSet = ps_updated;
     }
 
-}    //namespace ICP_MPHYG02
+}//namespace ICP_MPHYG02
